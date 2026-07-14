@@ -12,6 +12,17 @@ _model_type :str |None = None #gemini or fallback
 
 def _probe_gemini():
     """try on a small batch to see if the model is available.returns models or none """
+    try:
+        model = GoogleGenerativeAIEmbeddings(
+            model="models/gemini-embedding-2-preview",
+            google_api_key=settings.GEMINI_API_KEY,
+        )
+        model.embed_query("probe")
+        logfire.info("Gemini embeddings ready (gemini-embedding-2-preview, 3072-dim).")
+        return model
+    except Exception as e:
+        logfire.warning(f"Gemini probe failed: {e}. Will use sentence-transformers fallback.")
+        return None
 
 
 def _load_fallback():
