@@ -15,3 +15,5 @@ class settings:
     QDRANT_COLLECTION = "ENTERPRISE_RAG"
 
 settings = settings()
+
+#dbwrtnrynnbwtrbrtb
