@@ -16,4 +16,3 @@ class settings:
 
 settings = settings()
 
-#dbwrtnrynnbwtrbrtb
