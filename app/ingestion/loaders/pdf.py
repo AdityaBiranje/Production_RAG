@@ -48,4 +48,5 @@ def parse_pdf(file_path: str) -> str:
 
         except Exception as e:
             logfire.error(f"PDF Parse Failed for {file_path}: {e}")
-            raise
+            raise e
+        
