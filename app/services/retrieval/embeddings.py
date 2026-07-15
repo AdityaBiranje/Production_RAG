@@ -48,7 +48,8 @@ def _init():
 
 def get_embeddings_dim() -> int:
     """returns the dimension of the active model , call after _init()"""
-    return
+    _init()
+    return _GEMINI_DIM if _model_type == "gemini" else _FALLBACK_DIM
 
 def _embed_batch(batch: list[str]) -> list[list[float]]:
     """embeds a batch of text using the active model"""
