@@ -53,7 +53,27 @@ def get_embeddings_dim() -> int:
 
 def _embed_batch(batch: list[str]) -> list[list[float]]:
     """embeds a batch of text using the active model"""
-    return
+    if _model_type == "gemini":
+        # Exponential backoff: 1 s → 2 s → 4 s → 8 s (4 attempts total)
+        for attempt in range(4):
+            try:
+                return _active_model.embed_documents(batch)
+            except Exception as e:
+                err = str(e).lower()
+                is_rate_limit = any(x in err for x in ("429", "rate", "quota", "resource_exhausted"))
+                if is_rate_limit and attempt < 3:
+                    wait = 2 ** attempt
+                    logfire.warning(
+                        f"Gemini rate limit hit — retrying in {wait}s "
+                        f"(attempt {attempt + 1}/4)."
+                    )
+                    time.sleep(wait)
+                else:
+                    logfire.error(f"Gemini embedding failed: {e}")
+                    raise
+        raise RuntimeError("Gemini rate limit persisted after 4 attempts.")
+    else:
+        return _active_model.encode(batch, show_progress_bar=False).tolist()
 
 def embed_query(query:str)-> list[float]:
     """embeds a single query using the active model"""
