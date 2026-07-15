@@ -33,7 +33,18 @@ def _load_fallback():
 
 
 def _init():
-    return
+    global _active_model, _model_type
+    if _active_model is not None:
+        return
+
+    gemini = _probe_gemini()
+    if gemini:
+        _active_model = gemini
+        _model_type = "gemini"
+    else:
+        _active_model = _load_fallback()
+        _model_type = "fallback"
+
 
 def get_embeddings_dim() -> int:
     """returns the dimension of the active model , call after _init()"""
