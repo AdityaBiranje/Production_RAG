@@ -86,5 +86,11 @@ def embed_query(query:str)-> list[float]:
 def embed_texts(texts: list[str]) -> list[list[float]]:
     """embeds a list of texts using the active model"""
     _init()
+    all_embeddings: list[list[float]] = []
+    for i in range(0, len(texts), BATCH_SIZE):
+        batch = texts[i : i + BATCH_SIZE]
+        with logfire.span("Embed batch", model=_model_type, start=i, size=len(batch)):
+            all_embeddings.extend(_embed_batch(batch))
+    return all_embeddings
 
 
