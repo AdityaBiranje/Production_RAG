@@ -51,7 +51,7 @@ Git diff:
 console.print("[cyan]🤖 Generating commit message with Gemini...[/cyan]")
 
 resp = client.models.generate_content(
-    model="gemini-3.5-flash",
+    model="gemini-3.5-flash-lite",
     contents=prompt
 )
 
