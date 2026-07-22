@@ -139,5 +139,49 @@ def run_universal_ingestion(base_dir:str,explicit_source_type: str=None, wipe: b
             )
 
         #route to sub-floders or treat the whole dir as one source
-        
-                
+        subdirs = [
+            d for d in os.listdir(base_dir)
+            if os.path.isdir(os.path.join(base_dir,d))
+        ]
+
+        if not subdirs:
+            if explicit_source_type:
+                source_type = explicit_source_type
+            else:
+                base_name = os.path.basename(os.path.normpath(base_dir)).lower()
+                source_type = (
+                    "true" if " true" in base_name
+                    else "noisy" if "noisy" in base_name
+                    else "general "
+                    )
+
+            logfire.info(f"no sub-folders found- processing '{base_dir}' as '{source_type}'.")
+            process_directory(base_dir,source_type)
+
+        else:
+            for subdir in subdirs:
+                source_type = (
+                    "true" if "true" in subdir.lower()
+                    else "noisy" if "noisy" in subdir.lower()
+                    else subdir
+
+                )              
+                process_directory(os.path.join(base_dir,subdir),source_type)
+
+
+if __name__ == " __main__":
+    # Usage:
+    #   python -m app.ingestion.processor DATA --wipe
+    #   python -m app.ingestion.processor DATA/true_data true
+    wipe_requested = "--wipe" in sys.argv
+    clean_args = [a for a in sys.argv if a != "--wipe"]
+
+    target_dir = clean_args[1] if len(clean_args) >1 else "DATA"
+    explicit_type = clean_args[2] if len(clean_args) >2 else None
+
+    if not os.path.exists(target_dir):
+        print(f"error: target directory '{target_dir}' does not exist.")
+        sys.exit(1)
+
+    run_universal_ingestion(target_dir, explicit_source_type= explicit_type, wipe=wipe_requested)
+    logfire.info("✅ Ingestion completed successfully.")
