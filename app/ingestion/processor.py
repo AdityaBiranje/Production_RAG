@@ -98,3 +98,14 @@ def process_file(file_path: str, source_type: str, file_name: str):
             logfire.error(f"failed to process {file_name}: {e}")
         
 
+def process_directory(dir_path: str, source_type: str):
+    """Process all files in a directory."""
+    with logfire.span("Scanning Directory", path=dir_path, source= source_type):
+        files = [f for f in os.listdir(dir_path)if os.path.isfile(os.path.join(dir_path,f))]
+        logfire.logfire_info(f"found{len(files)} files in {dir_path}.")
+        for file_name in files:
+            process_file(os.path.join(dir_path,file_name), file_name, source_type)
+
+
+
+    
