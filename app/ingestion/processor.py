@@ -90,6 +90,7 @@ def process_file(file_path: str, source_type: str, file_name: str):
 
                 qdrant_client.upsert(
                     collection_name = settings.QDRANT_COLLECTION,
+                    points = points
                 )
 
                 logfire.info(f"Indexed {len(points)} points to qdrant from {file_name}.")
@@ -107,5 +108,36 @@ def process_directory(dir_path: str, source_type: str):
             process_file(os.path.join(dir_path,file_name), file_name, source_type)
 
 
+def run_universal_ingestion(base_dir:str,explicit_source_type: str=None, wipe: bool= False):
+    """
+    Scan base_dir, map sub-folders to source types, and ingest all documents.
+    Pass --wipe to drop and recreate the Qdrant collection before ingestion.
+    """
+    with logfire.span("Universal Ingestion Started", base_directory= base_dir):
 
-    
+        #wipe Qdrant collection if requested
+        if wipe:
+            with logfire.span("wipping Qdrant collection"):
+                if qdrant_client.collection_exists(settings.QDRANT_COLLECTION):
+                    qdrant_client.delete_collection(settings.QDRANT_COLLECTION)
+                    logfire.info(f"✅ Qdrant collection {settings.QDRANT_COLLECTION} deleted.")
+
+
+        #recreate qdrant collection - dimension resolved at runtime after embedding model probe
+        if not qdrant_client.collection_exists(settings.QDRANT_COLLECTION):
+            dim = get_embedding_dim()
+            qdrant_client.create_collection(
+                collection_name = settings.QDRANT_COLLECTION,
+                vectors_config = models.VectorParams(
+                    size = dim,
+                    distance = models.Distance.COSINE,
+                )
+            )
+            logfire.info(
+                f"✅ Qdrant collection '{settings.QDRANT_COLLECTION}' created."
+                f" Vector dimension: {dim}, Distance metric: COSINE"
+            )
+
+        #route to sub-floders or treat the whole dir as one source
+        
+                
