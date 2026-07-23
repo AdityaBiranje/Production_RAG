@@ -79,3 +79,5 @@ if push.returncode == 0:
     console.print("[green]✅ Commit pushed successfully![/green]")
 else:
     console.print("[red]Push failed.[/red]")
+
+#checking gac 
