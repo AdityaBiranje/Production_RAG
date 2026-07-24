@@ -21,7 +21,7 @@ def search_enterprise_knowledge(query: str, limit: int= 8):
         #using query_points - the modern standard fro qdrant 
         response = client.query_points(
             collection_name = settings.QDRANT_COLLECTION,
-            query= query_vector
+            query= query_vector,
             limit= limit,
             with_payload= True #JSON
         )
