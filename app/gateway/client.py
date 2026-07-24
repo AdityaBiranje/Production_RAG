@@ -56,3 +56,15 @@ def get_langchain_llm(feature: str = "rag") -> ChatOpenAI:
         )
     )
 
+def extract_cache_status(response) -> str:
+     """
+    Pull x-portkey-cache-status from the Portkey native client response headers.
+    Tries multiple attribute paths defensively — returns 'MISS' if not found.
+    """
+     for attr in ("_raw_response","_response","_hhtp_response"):
+         raw = getattr(response,attr,None)
+         if raw is not None:
+            status = getattr(raw, "headers",{}).get("x-portkey-cache-status","")
+            if status:
+                return status.upper()
+     return "MISS"
